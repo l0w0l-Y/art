@@ -1,7 +1,10 @@
 package com.kaleksandra.coredata.network.di
 
 import android.content.Context
+import androidx.room.Room
+import com.kaleksandra.coredata.network.dao.GalleryDao
 import com.kaleksandra.coredata.network.database.DataStoreProvider
+import com.kaleksandra.coredata.network.database.Database
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,4 +22,21 @@ class DatabaseModule {
         @ApplicationContext context: Context,
         @IoDispatcher dispatcher: CoroutineDispatcher
     ): DataStoreProvider = DataStoreProvider(context, dispatcher)
+
+    @Provides
+    fun provideDatabase(
+        @ApplicationContext context: Context
+    ): Database {
+        return Room.databaseBuilder(
+            context,
+            Database::class.java,
+            "database"
+        ).build()
+    }
+
+    @Provides
+    fun provideEventDao(database: Database): GalleryDao {
+        return database.galleryDao()
+    }
+
 }

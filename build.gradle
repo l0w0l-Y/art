@@ -17,6 +17,7 @@ buildscript {
         datastore_version = '1.0.0'
         gson_version = '2.10.1'
         coil_version = '2.4.0'
+        room_version = '2.4.0'
 
         core = "androidx.core:core-ktx:$core_version"
         composeUi = "androidx.compose.ui:ui:$compose_version"
@@ -43,6 +44,8 @@ buildscript {
         coil = "io.coil-kt:coil-compose:$coil_version"
         material = "androidx.compose.material:material:1.6.0"
         permissions = "com.google.accompanist:accompanist-permissions:$accompanist_version"
+        room = "androidx.room:room-runtime:$room_version"
+        roomKapt = "androidx.room:room-compiler:$room_version"
     }
 }
 

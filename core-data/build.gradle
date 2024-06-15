@@ -30,4 +30,7 @@ dependencies {
 
     implementation(serialization)
     implementation(dataStore)
+
+    implementation(room)
+    kapt(roomKapt)
 }

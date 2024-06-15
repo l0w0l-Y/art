@@ -3,6 +3,7 @@ package com.kaleksandra.featuremain.gallery
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,9 +11,15 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AddPhotoAlternate
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
@@ -21,24 +28,25 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.kaleksandra.corenavigation.MainDirection
+import com.kaleksandra.featuremain.stats.ImageStatsModel
 import com.taekwondo.featuremain.R
 
 @Composable
-fun GalleryScreen() {
+fun GalleryScreen(navController: NavController, viewModel: GalleryViewModel = hiltViewModel()) {
+    val state by viewModel.state.collectAsState()
     GalleryScreen(
-        images = listOf(
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Vrubel_Demon.jpg/425px-Vrubel_Demon.jpg",
-            "https://cs12.pikabu.ru/post_img/2022/01/13/5/1642059717191632422.jpg",
-            "https://artchive.ru/res/media/img/oy800/work/454/348161@2x.jpg",
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTI0RrjvKFlmRmL7R7JT2J0kE4-5w_eQh4vCQ&s",
-        )
-    )
+        models = state
+    ) { navController.navigate(MainDirection.path) }
 }
 
 @Composable
 fun GalleryScreen(
-    images: List<String> = emptyList(),
+    models: List<ImageStatsModel> = emptyList(),
+    onCreateArt: () -> Unit = {}
 ) {
     Column(
         modifier = with(Modifier) {
@@ -49,20 +57,30 @@ fun GalleryScreen(
                 )
         }
     ) {
-        Text(
-            text = "Галерея",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 12.dp, start = 20.dp, end = 20.dp)
-        )
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Галерея",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(top = 12.dp, start = 20.dp, end = 20.dp)
+            )
+            IconButton(onClick = { onCreateArt() }) {
+                Icon(
+                    Icons.Outlined.AddPhotoAlternate,
+                    contentDescription = "Добавить фото",
+                )
+            }
+        }
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Adaptive(100.dp),
             verticalItemSpacing = 20.dp,
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             content = {
-                items(images) { photo ->
+                items(models) { model ->
                     AsyncImage(
-                        model = photo,
+                        model = model.link,
                         contentScale = ContentScale.Crop,
                         contentDescription = null,
                         modifier = Modifier

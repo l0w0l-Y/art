@@ -29,6 +29,17 @@ suspend fun <R> call(
     }
 }
 
+suspend fun <R> callDB(
+    dispatcher: CoroutineDispatcher,
+    call: suspend () -> R
+): Effect<R> = withContext(dispatcher) {
+    try {
+        Success(call())
+    } catch (exception: Exception) {
+        Error(exception)
+    }
+}
+
 fun <T> Effect<T>.toCompletable(): Effect<Completable> {
     return when (this) {
         is Error -> Error(this.exception)
