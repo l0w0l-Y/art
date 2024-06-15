@@ -1,5 +1,6 @@
-package com.kaleksandra.featuremain.gallery
+package com.kaleksandra.featuremain.image
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaleksandra.coredata.network.doOnSuccess
@@ -12,17 +13,17 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class GalleryViewModel @Inject constructor(
+class OpenImageViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     val repository: ArtRepository,
 ) : ViewModel() {
-
-    val state = MutableStateFlow<List<ImageStatsModel>>(emptyList())
+    val stats = MutableStateFlow<ImageStatsModel?>(null)
 
     init {
-        viewModelScope.launch {
-            repository.getGallery().doOnSuccess {
-                state.emit(
-                    it.map {
+        savedStateHandle.get<Long>("id")?.let {
+            viewModelScope.launch {
+                repository.getArt(it).doOnSuccess {
+                    stats.emit(
                         ImageStatsModel(
                             id = it.id,
                             link = it.link,
@@ -32,8 +33,8 @@ class GalleryViewModel @Inject constructor(
                             colors = it.colors.split(", ").map { hexToRgb(it) },
                             images = it.images.split(", ")
                         )
-                    }
-                )
+                    )
+                }
             }
         }
     }

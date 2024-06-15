@@ -23,6 +23,7 @@ interface ArtRepository {
     suspend fun sendPhoto(file: File): Effect<ImageStatsDTO>
 
     suspend fun getGallery(): Effect<List<GalleryEntity>>
+    suspend fun getArt(id: Long): Effect<GalleryEntity>
 }
 
 class ArtRepositoryImpl @Inject constructor(
@@ -54,5 +55,9 @@ class ArtRepositoryImpl @Inject constructor(
 
     override suspend fun getGallery(): Effect<List<GalleryEntity>> {
         return callDB(dispatcher) { dao.getGallery() }
+    }
+
+    override suspend fun getArt(id: Long): Effect<GalleryEntity> {
+        return callDB(dispatcher) { dao.getArt(id) }
     }
 }

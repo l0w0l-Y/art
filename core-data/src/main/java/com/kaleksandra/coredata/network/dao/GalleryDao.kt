@@ -13,4 +13,7 @@ interface GalleryDao {
 
     @Query("SELECT * FROM gallery")
     fun getGallery(): List<GalleryEntity>
+
+    @Query("SELECT * FROM gallery WHERE id = :id")
+    fun getArt(id: Long): GalleryEntity
 }

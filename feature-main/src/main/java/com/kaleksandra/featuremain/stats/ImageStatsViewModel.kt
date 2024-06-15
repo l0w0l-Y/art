@@ -29,6 +29,7 @@ class ImageStatsViewModel @Inject constructor(
 
     val stats = MutableStateFlow<ImageStatsModel>(
         ImageStatsModel(
+            id = 0,
             link = "https://presenta.com.ua/wp-content/uploads/2020/08/gustav_klimt_zolota_adel-1024x1024.jpg",
             name = "Name",
             type = "Type",
@@ -48,6 +49,7 @@ class ImageStatsViewModel @Inject constructor(
                 repository.sendPhoto(File(it)).doOnSuccess {
                     stats.emit(
                         ImageStatsModel(
+                            id = 0,
                             link = it.link,
                             name = it.name,
                             type = it.type,

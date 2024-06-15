@@ -9,13 +9,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.kaleksandra.corenavigation.GalleryDirection
 import com.kaleksandra.corenavigation.MainDirection
+import com.kaleksandra.corenavigation.OpenImageDirection
 import com.kaleksandra.coretheme.AppTheme
 import com.kaleksandra.featuremain.gallery.GalleryScreen
+import com.kaleksandra.featuremain.image.OpenImageScreen
 import com.kaleksandra.featuremain.stats.ImageStatsScreen
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -39,6 +43,14 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(GalleryDirection.path) {
                             GalleryScreen(navController = navController)
+                        }
+                        composable(
+                            OpenImageDirection.path + "?id={id}",
+                            arguments = listOf(navArgument("id") {
+                                type = NavType.LongType
+                            })
+                        ) {
+                            OpenImageScreen(navController = navController)
                         }
                     }
                 }

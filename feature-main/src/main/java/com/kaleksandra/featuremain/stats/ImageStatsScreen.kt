@@ -1,6 +1,9 @@
 package com.kaleksandra.featuremain.stats
 
+import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.EaseInOutBack
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -13,24 +16,26 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Archive
+import androidx.compose.material.icons.outlined.Photo
+import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,14 +47,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.kaleksandra.coretheme.AppTheme
 import com.kaleksandra.coretheme.Dimen
 import com.kaleksandra.featuremain.photo.CameraScreen
 import com.taekwondo.featuremain.R
@@ -75,64 +80,140 @@ fun ImageStatsScreen(
     onImageSelected: (Uri) -> Unit
 ) {
     var uri by remember { mutableStateOf(Uri.EMPTY) }
-    var isCameraOpened by remember { mutableStateOf(true) }
+    var isCameraOpened by remember { mutableStateOf(false) }
+    var type by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { _uri: Uri? ->
+        _uri?.let {
+            context.contentResolver.takePersistableUriPermission(
+                _uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+            type = "gallery"
+            uri = _uri
+            //onImageSelected(_uri)
+        }
+    }
+    LaunchedEffect(key1 = uri) {
+        if (uri != Uri.EMPTY) {
+            onImageSelected(uri)
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(Dimen.padding_16),
         verticalArrangement = Arrangement.spacedBy(Dimen.padding_8)
     ) {
-        if (isCameraOpened) {
-            CameraScreen {
-                onImageSelected(it)
-                uri = it
-                isCameraOpened = false
-            }
-        } else {
-            when (state) {
-                ImageStatsViewModel.LoadingState -> {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        LoadingAnimation(modifier = Modifier.align(Alignment.Center))
-                    }
-                }
-
-                ImageStatsViewModel.SuccessState -> {
-                    AsyncImage(
-                        model = stats.link,
-                        contentDescription = null,
-                        modifier = Modifier.border(16.dp, Color(0xFF381F08), RectangleShape)
-                    )
-                    Text(text = stats.name)
-                    Text(text = stats.type)
-                    Text(text = stats.style)
-                    LazyRow(
+        when (type) {
+            null -> {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        onClick = {
+                            launcher.launch(arrayOf("image/*"))
+                        },
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(Dimen.padding_4)
                     ) {
-                        items(stats.colors) {
-                            Spacer(
-                                modifier = Modifier
-                                    .size(16.dp)
-                                    .background(it, CircleShape)
-                            )
+                        Row(horizontalArrangement = Arrangement.spacedBy(Dimen.padding_4)) {
+                            Icon(imageVector = Icons.Outlined.Photo, contentDescription = null)
+                            Text(text = "Выбрать из галереи")
                         }
                     }
-                    LazyVerticalGrid(columns = GridCells.Fixed(2)) {
-                        items(stats.images) {
-                            AsyncImage(
-                                model = it,
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxWidth(),
+                    Button(
+                        onClick = {
+                            isCameraOpened = true
+                            type = "camera"
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(Dimen.padding_4)) {
+                            Icon(
+                                imageVector = Icons.Outlined.PhotoCamera,
+                                contentDescription = null
                             )
+                            Text(text = "Сделать фото")
                         }
                     }
-                    Button(onClick = { onImageSelected(uri) }) {
-                        Text(text = "Загрузить")
+                    Button(
+                        onClick = {
+                            isCameraOpened = true
+                            type = "camera"
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(Dimen.padding_4)) {
+                            Icon(
+                                imageVector = Icons.Outlined.Archive,
+                                contentDescription = null
+                            )
+                            Text(text = "Добавить архив")
+                        }
                     }
                 }
+            }
 
-                else -> {
+            else -> {
+                if (isCameraOpened) {
+                    CameraScreen {
+                        //onImageSelected(it)
+                        uri = it
+                        isCameraOpened = false
+                    }
+                } else {
+                    when (state) {
+                        ImageStatsViewModel.LoadingState -> {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                LoadingAnimation(modifier = Modifier.align(Alignment.Center))
+                            }
+                        }
 
+                        ImageStatsViewModel.SuccessState -> {
+                            AsyncImage(
+                                model = stats.link,
+                                contentDescription = null,
+                                modifier = Modifier.border(16.dp, Color(0xFF381F08), RectangleShape)
+                            )
+                            Text(text = stats.type, style = MaterialTheme.typography.titleLarge)
+                            Text(text = stats.style, style = MaterialTheme.typography.titleMedium)
+                            Text(text = "Совпадения с ИИ не найдены")
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(Dimen.padding_4)
+                            ) {
+                                items(stats.colors) {
+                                    Spacer(
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .background(it, CircleShape)
+                                    )
+                                }
+                            }
+                            Text(
+                                "Похожие работы",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(vertical = Dimen.padding_8)
+                            )
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(Dimen.padding_8)) {
+                                items(stats.images) {
+                                    AsyncImage(
+                                        model = it,
+                                        contentDescription = null,
+                                        modifier = Modifier.height(100.dp),
+                                        contentScale = ContentScale.FillHeight
+                                    )
+                                }
+                            }
+                        }
+
+                        else -> {
+
+                        }
+                    }
                 }
             }
         }
@@ -148,18 +229,29 @@ fun LoadingAnimation(modifier: Modifier = Modifier, speed: Int = 600, height: Dp
             repeatMode = RepeatMode.Reverse,
         ), label = "RotationCompletion"
     )
-    Box(
-        modifier = modifier, contentAlignment = Alignment.Center
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(Dimen.padding_4),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            modifier = Modifier
-                .graphicsLayer {
-                    rotationZ = rotation
-                }
-                .height(height),
-            painter = painterResource(id = R.drawable.ic_art),
-            contentDescription = "",
-            contentScale = ContentScale.FillHeight
+        Box(
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                modifier = Modifier
+                    .graphicsLayer {
+                        rotationZ = rotation
+                    }
+                    .height(height),
+                painter = painterResource(id = R.drawable.ic_art),
+                contentDescription = "",
+                contentScale = ContentScale.FillHeight
+            )
+        }
+        Text(
+            text = "Идет анализ работы",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold
         )
     }
 }
