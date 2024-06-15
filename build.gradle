@@ -41,6 +41,8 @@ buildscript {
         dataStore = "androidx.datastore:datastore-preferences:$datastore_version"
         gson = "com.google.code.gson:gson:$gson_version"
         coil = "io.coil-kt:coil-compose:$coil_version"
+        material = "androidx.compose.material:material:1.6.0"
+        permissions = "com.google.accompanist:accompanist-permissions:$accompanist_version"
     }
 }
 

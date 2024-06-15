@@ -6,7 +6,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
-private val primary = Color(0xFF3246F3)
+private val primary = Color(0xFFEEB684)
 
 internal val DarkColors = darkColorScheme(
     primary = primary,

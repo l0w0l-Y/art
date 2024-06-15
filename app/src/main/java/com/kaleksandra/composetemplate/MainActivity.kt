@@ -9,13 +9,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.kaleksandra.corenavigation.BottomBar
-import com.kaleksandra.corenavigation.Screen
+import com.kaleksandra.corenavigation.GalleryDirection
+import com.kaleksandra.corenavigation.MainDirection
+import com.kaleksandra.corenavigation.TakePhotoDirection
 import com.kaleksandra.coretheme.AppTheme
+import com.kaleksandra.featuremain.gallery.GalleryScreen
+import com.kaleksandra.featuremain.stats.ImageStatsScreen
+import com.kaleksandra.featuremain.photo.CameraScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -26,8 +29,20 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
+                val startDestination = MainDirection.path
+                val navController = rememberNavController()
                 Scaffold {
-                    Main()
+                    NavHost(
+                        navController = navController,
+                        startDestination = startDestination,
+                    ) {
+                        composable(MainDirection.path) {
+                            ImageStatsScreen(navController = navController)
+                        }
+                        composable(GalleryDirection.path){
+                            GalleryScreen()
+                        }
+                    }
                 }
             }
         }
